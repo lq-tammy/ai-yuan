@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>小鸢游乐园 Yuan Game Park</title>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --sky1: #87CEEB;
+      --sky2: #E0F4FF;
+      --dawn: #FFD580;
+      --orange: #FF8C42;
+      --teal: #4ECDC4;
+      --green: #6BCB77;
+      --purple: #A855F7;
+      --pink: #FF6B9D;
+      --bg: #F0F9FF;
+      --text: #2D3A4A;
+      --radius: 24px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Baloo 2', 'PingFang SC', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      overflow-x: hidden;
+    }
+
+    /* ══ SKY HERO ══ */
+    .hero {
+      position: relative;
+      min-height: 100vh;
+      background: linear-gradient(180deg, #1a3a5c 0%, #2e6fa8 30%, #87CEEB 65%, #c8eaff 85%, #F0F9FF 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      padding: 40px 24px 120px;
+    }
+
+    /* Stars */
+    .stars {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 35%;
+      pointer-events: none;
+    }
+    .star {
+      position: absolute;
+      background: #fff;
+      border-radius: 50%;
+      animation: twinkle 3s infinite alternate;
+    }
+    @keyframes twinkle {
+      from { opacity: 0.2; transform: scale(1); }
+      to   { opacity: 1;   transform: scale(1.4); }
+    }
+
+    /* Clouds */
+    .cloud {
+      position: absolute;
+      background: #fff;
+      border-radius: 999px;
+      opacity: 0.85;
+      animation: drift linear infinite;
+    }
+    .cloud::before, .cloud::after {
+      content: '';
+      position: absolute;
+      background: #fff;
+      border-radius: 50%;
+    }
+    @keyframes drift {
+      from { transform: translateX(-200px); }
+      to   { transform: translateX(110vw); }
+    }
+
+    /* Flying birds silhouette */
+    .bird-flock {
+      position: absolute;
+      top: 22%;
+      left: -120px;
+      display: flex;
+      gap: 18px;
+      animation: flyAcross 18s linear infinite;
+      pointer-events: none;
+    }
+    @keyframes flyAcross {
+      from { transform: translateX(-200px); }
+      to   { transform: translateX(110vw); }
+    }
+    .bird-sil {
+      font-size: 28px;
+      animation: flap 0.6s ease-in-out infinite alternate;
+      filter: drop-shadow(0 2px 6px #0004);
+    }
+    .bird-sil:nth-child(2) { animation-delay: 0.15s; margin-top: 12px; font-size: 22px; }
+    .bird-sil:nth-child(3) { animation-delay: 0.3s;  margin-top: -8px; font-size: 18px; }
+    .bird-sil:nth-child(4) { animation-delay: 0.1s;  margin-top: 20px; font-size: 24px; }
+    @keyframes flap {
+      from { transform: scaleY(1) translateY(0); }
+      to   { transform: scaleY(0.7) translateY(-4px); }
+    }
+
+    /* Logo */
+    .logo-wrap {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      margin-bottom: 16px;
+    }
+    .logo-bird {
+      font-size: 96px;
+      line-height: 1;
+      filter: drop-shadow(0 8px 24px #0003);
+      animation: soar 4s ease-in-out infinite;
+      display: block;
+    }
+    @keyframes soar {
+      0%,100% { transform: translateY(0) rotate(-2deg); }
+      50%      { transform: translateY(-16px) rotate(2deg); }
+    }
+    .logo-ring {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 130px; height: 130px;
+      border-radius: 50%;
+      border: 3px solid #fff4;
+      animation: pulse-ring 3s ease-in-out infinite;
+    }
+    @keyframes pulse-ring {
+      0%,100% { transform: translate(-50%,-50%) scale(1); opacity: 0.6; }
+      50%      { transform: translate(-50%,-50%) scale(1.15); opacity: 0.2; }
+    }
+
+    .site-title {
+      position: relative;
+      z-index: 2;
+      font-size: clamp(2rem, 6vw, 3.2rem);
+      font-weight: 800;
+      color: #fff;
+      text-shadow: 0 4px 20px #0004;
+      text-align: center;
+      line-height: 1.2;
+    }
+    .site-title span {
+      display: block;
+      font-size: 0.5em;
+      font-weight: 600;
+      color: #ffffffcc;
+      letter-spacing: 0.08em;
+      margin-top: 4px;
+    }
+
+    .site-desc {
+      position: relative;
+      z-index: 2;
+      margin-top: 16px;
+      font-size: 1.1rem;
+      color: #ffffffcc;
+      text-align: center;
+      max-width: 400px;
+    }
+
+    /* Author card */
+    .author-card {
+      position: relative;
+      z-index: 2;
+      margin-top: 32px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: #ffffff22;
+      border: 2px solid #ffffff44;
+      backdrop-filter: blur(8px);
+      border-radius: 999px;
+      padding: 10px 24px 10px 10px;
+    }
+    .author-avatar {
+      width: 52px; height: 52px;
+      border-radius: 50%;
+      border: 3px solid #fff;
+      background: linear-gradient(135deg, #FFD580, #FF8C42);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 28px;
+      flex-shrink: 0;
+    }
+    .author-info { color: #fff; }
+    .author-info strong { display: block; font-size: 1rem; font-weight: 700; }
+    .author-info a {
+      font-size: 0.8rem;
+      color: #ffffffaa;
+      text-decoration: none;
+    }
+    .author-info a:hover { color: #fff; }
+
+    /* Scroll hint */
+    .scroll-hint {
+      position: absolute;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      color: #ffffffaa;
+      font-size: 0.85rem;
+      animation: bounce 2s ease-in-out infinite;
+      cursor: pointer;
+    }
+    @keyframes bounce {
+      0%,100% { transform: translateX(-50%) translateY(0); }
+      50%      { transform: translateX(-50%) translateY(8px); }
+    }
+
+    /* ══ FOREST SECTION ══ */
+    .forest-section {
+      position: relative;
+      background: linear-gradient(180deg, #F0F9FF 0%, #e8f5e9 40%, #c8e6c9 100%);
+      padding: 80px 24px 120px;
+      overflow: hidden;
+    }
+
+    /* Tree decorations */
+    .tree-row {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      display: flex;
+      justify-content: space-around;
+      align-items: flex-end;
+      pointer-events: none;
+      height: 100px;
+    }
+    .tree { font-size: clamp(40px, 6vw, 72px); line-height: 1; }
+
+    .section-header {
+      text-align: center;
+      margin-bottom: 60px;
+      position: relative;
+      z-index: 1;
+    }
+    .section-header h2 {
+      font-size: clamp(1.6rem, 4vw, 2.4rem);
+      font-weight: 800;
+      color: #2e6fa8;
+    }
+    .section-header p {
+      margin-top: 8px;
+      color: #5a8a6a;
+      font-size: 1rem;
+    }
+
+    /* ══ GAME PATH ══ */
+    .game-path {
+      position: relative;
+      z-index: 1;
+      max-width: 900px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    /* Winding path line */
+    .game-path::before {
+      content: '';
+      position: absolute;
+      left: 50%;
+      top: 60px;
+      bottom: 60px;
+      width: 4px;
+      background: repeating-linear-gradient(
+        to bottom,
+        #a8d5a2 0px, #a8d5a2 12px,
+        transparent 12px, transparent 24px
+      );
+      transform: translateX(-50%);
+      border-radius: 4px;
+    }
+
+    .path-item {
+      display: flex;
+      align-items: center;
+      gap: 32px;
+      padding: 20px 0;
+      position: relative;
+    }
+    .path-item:nth-child(even) { flex-direction: row-reverse; }
+
+    .path-connector {
+      flex-shrink: 0;
+      width: 56px;
+      height: 56px;
+      background: #fff;
+      border: 4px solid #a8d5a2;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      position: relative;
+      z-index: 2;
+      box-shadow: 0 4px 16px #0001;
+    }
+
+    /* ══ GAME CARD (nest style) ══ */
+    .nest-card {
+      flex: 1;
+      background: #fff;
+      border-radius: 28px;
+      padding: 28px;
+      box-shadow: 0 6px 32px #0000000e;
+      border: 3px solid transparent;
+      text-decoration: none;
+      color: inherit;
+      display: flex;
+      gap: 20px;
+      align-items: center;
+      transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s;
+      position: relative;
+      overflow: hidden;
+      max-width: 380px;
+    }
+    .nest-card::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--card-glow);
+      opacity: 0;
+      transition: opacity 0.25s;
+      border-radius: 28px;
+    }
+    .nest-card:hover {
+      transform: translateY(-6px) scale(1.02);
+      box-shadow: 0 16px 48px #00000018;
+      border-color: var(--accent);
+    }
+    .nest-card:hover::after { opacity: 0.06; }
+    .nest-card:active { transform: scale(0.97); }
+
+    .nest-card.locked {
+      opacity: 0.55;
+      cursor: default;
+      pointer-events: none;
+    }
+
+    .card-icon-wrap {
+      flex-shrink: 0;
+      width: 80px; height: 80px;
+      border-radius: 20px;
+      background: var(--icon-bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 44px;
+      box-shadow: 0 4px 16px var(--accent-shadow);
+    }
+
+    .card-body { flex: 1; }
+    .card-name {
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: var(--accent-dark);
+    }
+    .card-desc {
+      font-size: 0.85rem;
+      color: #777;
+      margin-top: 4px;
+      line-height: 1.5;
+    }
+    .card-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 10px;
+    }
+    .tag {
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      background: var(--icon-bg);
+      color: var(--accent-dark);
+    }
+    .card-age {
+      font-size: 0.75rem;
+      color: #aaa;
+      margin-top: 8px;
+      font-weight: 600;
+    }
+
+    .lock-badge {
+      position: absolute;
+      top: 12px; right: 12px;
+      background: #ddd;
+      color: #999;
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 999px;
+    }
+
+    /* ══ NEST SECTION ══ */
+    .nest-section {
+      background: linear-gradient(180deg, #c8e6c9 0%, #fff9f0 100%);
+      padding: 80px 24px 80px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .nest-section h2 {
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: #5a3e1b;
+    }
+    .nest-section p {
+      color: #8a6a4a;
+      margin-top: 8px;
+      font-size: 0.95rem;
+    }
+    .nest-emoji {
+      font-size: 80px;
+      display: block;
+      margin: 24px auto;
+      animation: sway 3s ease-in-out infinite;
+    }
+    @keyframes sway {
+      0%,100% { transform: rotate(-4deg); }
+      50%      { transform: rotate(4deg); }
+    }
+
+    /* ══ FOOTER ══ */
+    footer {
+      background: #1a3a5c;
+      color: #7aa8cc;
+      text-align: center;
+      padding: 32px 24px;
+      font-size: 0.85rem;
+    }
+    footer a { color: #87CEEB; text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+
+    /* ══ RESPONSIVE ══ */
+    @media (max-width: 640px) {
+      .game-path::before { left: 28px; }
+      .path-item, .path-item:nth-child(even) {
+        flex-direction: column;
+        align-items: flex-start;
+        padding-left: 72px;
+      }
+      .path-connector {
+        position: absolute;
+        left: 0;
+      }
+      .nest-card { max-width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══ HERO ══ -->
+<section class="hero">
+
+  <!-- Stars -->
+  <div class="stars" id="stars"></div>
+
+  <!-- Clouds -->
+  <div class="cloud" style="width:120px;height:36px;top:38%;left:-150px;animation-duration:28s;animation-delay:-5s;">
+    <div style="width:60px;height:60px;top:-30px;left:20px;position:absolute;background:#fff;border-radius:50%;"></div>
+    <div style="width:40px;height:40px;top:-20px;left:55px;position:absolute;background:#fff;border-radius:50%;"></div>
+  </div>
+  <div class="cloud" style="width:90px;height:28px;top:52%;left:-120px;animation-duration:22s;animation-delay:-12s;opacity:0.7;">
+    <div style="width:44px;height:44px;top:-22px;left:14px;position:absolute;background:#fff;border-radius:50%;"></div>
+  </div>
+
+  <!-- Flying flock -->
+  <div class="bird-flock">
+    <div class="bird-sil">🦅</div>
+    <div class="bird-sil">🦅</div>
+    <div class="bird-sil">🦅</div>
+    <div class="bird-sil">🦅</div>
+  </div>
+
+  <!-- Logo -->
+  <div class="logo-wrap">
+    <div class="logo-ring"></div>
+    <span class="logo-bird">🪁</span>
+  </div>
+
+  <h1 class="site-title">
+    小鸢游乐园
+    <span>Yuan Game Park</span>
+  </h1>
+  <p class="site-desc">妈妈牌成长小游戏，一起探索美丽新世界 🌏</p>
+
+  <!-- Author -->
+  <div class="author-card">
+    <div class="author-avatar">🐦</div>
+    <div class="author-info">
+      <strong>小鸢妈妈</strong>
+      <a href="mailto:yanyangliuqu@hotmail.com">yanyangliuqu@hotmail.com</a>
+    </div>
+  </div>
+
+  <!-- Scroll hint -->
+  <div class="scroll-hint" onclick="document.getElementById('explore').scrollIntoView({behavior:'smooth'})">
+    <span>向下探索</span>
+    <span style="font-size:1.4rem;">🪶</span>
+  </div>
+
+</section>
+
+<!-- ══ FOREST EXPLORE ══ -->
+<section class="forest-section" id="explore">
+
+  <div class="section-header">
+    <h2>🌿 沿着小径，发现游戏</h2>
+    <p>跟着鸢鸟的足迹，一起探索这片游戏森林吧</p>
+  </div>
+
+  <div class="game-path">
+
+    <!-- 泡泡点击 -->
+    <div class="path-item">
+      <div class="path-connector">🪺</div>
+      <a class="nest-card" href="games/bubbles/index.html"
+         style="--accent:#4ECDC4;--accent-dark:#1A9E96;--accent-shadow:#4ECDC440;--icon-bg:#E0FAF8;--card-glow:#4ECDC4;">
+        <div class="card-icon-wrap">🫧</div>
+        <div class="card-body">
+          <div class="card-name">泡泡点点点</div>
+          <div class="card-desc">点击屏幕让五彩泡泡爆炸，每次都有惊喜音效！</div>
+          <div class="card-tags">
+            <span class="tag">手眼协调</span>
+            <span class="tag">因果认知</span>
+            <span class="tag">色彩感知</span>
+          </div>
+          <div class="card-age">👶 适合 0–3 岁</div>
+        </div>
+      </a>
+    </div>
+
+    <!-- 动物叫声 -->
+    <div class="path-item">
+      <div class="path-connector">🐦</div>
+      <a class="nest-card locked" href="games/animals/index.html"
+         style="--accent:#FF6B9D;--accent-dark:#C0396B;--accent-shadow:#FF6B9D40;--icon-bg:#FFE8F2;--card-glow:#FF6B9D;">
+        <div class="lock-badge">🔒 即将开放</div>
+        <div class="card-icon-wrap">🐮</div>
+        <div class="card-body">
+          <div class="card-name">动物叫叫</div>
+          <div class="card-desc">点击小动物，听它们发出真实叫声，认识新朋友！</div>
+          <div class="card-tags">
+            <span class="tag">动物认知</span>
+            <span class="tag">听觉刺激</span>
+            <span class="tag">语言启蒙</span>
+          </div>
+          <div class="card-age">👶 适合 1–3 岁</div>
+        </div>
+      </a>
+    </div>
+
+    <!-- 形状配对 -->
+    <div class="path-item">
+      <div class="path-connector">🌸</div>
+      <a class="nest-card locked" href="games/shapes/index.html"
+         style="--accent:#A855F7;--accent-dark:#7C3AED;--accent-shadow:#A855F740;--icon-bg:#F3E8FF;--card-glow:#A855F7;">
+        <div class="lock-badge">🔒 即将开放</div>
+        <div class="card-icon-wrap">🔷</div>
+        <div class="card-body">
+          <div class="card-name">形状配对</div>
+          <div class="card-desc">把形状拖进对应的洞洞里，颜色和形状一起学！</div>
+          <div class="card-tags">
+            <span class="tag">形状认知</span>
+            <span class="tag">颜色分类</span>
+            <span class="tag">逻辑思维</span>
+          </div>
+          <div class="card-age">👶 适合 2–3 岁</div>
+        </div>
+      </a>
+    </div>
+
+    <!-- 数数乐 -->
+    <div class="path-item">
+      <div class="path-connector">🌻</div>
+      <a class="nest-card locked" href="games/counting/index.html"
+         style="--accent:#FFD93D;--accent-dark:#B8860B;--accent-shadow:#FFD93D40;--icon-bg:#FFFBE6;--card-glow:#FFD93D;">
+        <div class="lock-badge">🔒 即将开放</div>
+        <div class="card-icon-wrap">🔢</div>
+        <div class="card-body">
+          <div class="card-name">数数乐</div>
+          <div class="card-desc">点一个数一个，从 1 数到 5，数字启蒙从这里开始！</div>
+          <div class="card-tags">
+            <span class="tag">数字启蒙</span>
+            <span class="tag">专注力</span>
+            <span class="tag">数学思维</span>
+          </div>
+          <div class="card-age">👶 适合 2–3 岁</div>
+        </div>
+      </a>
+    </div>
+
+    <!-- 涂涂画画 -->
+    <div class="path-item">
+      <div class="path-connector">🍃</div>
+      <a class="nest-card locked" href="games/drawing/index.html"
+         style="--accent:#6BCB77;--accent-dark:#3A8A44;--accent-shadow:#6BCB7740;--icon-bg:#E8F8EA;--card-glow:#6BCB77;">
+        <div class="lock-badge">🔒 即将开放</div>
+        <div class="card-icon-wrap">🎨</div>
+        <div class="card-body">
+          <div class="card-name">涂涂画画</div>
+          <div class="card-desc">用手指在屏幕上自由涂色，画出属于宝宝的世界！</div>
+          <div class="card-tags">
+            <span class="tag">创意表达</span>
+            <span class="tag">精细动作</span>
+            <span class="tag">色彩感知</span>
+          </div>
+          <div class="card-age">👶 适合 1–3 岁</div>
+        </div>
+      </a>
+    </div>
+
+  </div>
+
+  <!-- Tree row -->
+  <div class="tree-row">
+    <span class="tree">🌲</span>
+    <span class="tree">🌳</span>
+    <span class="tree">🌲</span>
+    <span class="tree">🌴</span>
+    <span class="tree">🌲</span>
+    <span class="tree">🌳</span>
+    <span class="tree">🌲</span>
+  </div>
+
+</section>
+
+<!-- ══ NEST CTA ══ -->
+<section class="nest-section">
+  <span class="nest-emoji">🪺</span>
+  <h2>更多游戏正在孵化中…</h2>
+  <p>小鸢妈妈还在努力做新游戏，敬请期待 🐣</p>
+</section>
+
+<!-- ══ FOOTER ══ -->
+<footer>
+  用 ❤️ 为小鸢制作 · 无广告 · 无数据收集 · 安全放心玩<br/>
+  <a href="mailto:yanyangliuqu@hotmail.com">yanyangliuqu@hotmail.com</a>
+</footer>
+
+<script>
+  // Generate stars
+  const starsEl = document.getElementById('stars');
+  for (let i = 0; i < 60; i++) {
+    const s = document.createElement('div');
+    s.className = 'star';
+    const size = Math.random() * 3 + 1;
+    s.style.cssText = `
+      width:${size}px; height:${size}px;
+      top:${Math.random() * 100}%;
+      left:${Math.random() * 100}%;
+      animation-delay:${Math.random() * 4}s;
+      animation-duration:${2 + Math.random() * 3}s;
+    `;
+    starsEl.appendChild(s);
+  }
+</script>
+
+</body>
+</html>
