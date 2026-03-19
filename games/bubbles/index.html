@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>泡泡点点点 🫧</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'PingFang SC', sans-serif;
+      overflow: hidden;
+      width: 100vw; height: 100vh;
+      background: #87CEEB;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    /* ══ GARDEN BACKGROUND ══ */
+    #garden {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      background: linear-gradient(180deg,
+        #b8e4f9 0%,
+        #d4f1ff 40%,
+        #c8f0a0 70%,
+        #7ec850 85%,
+        #5aaa30 100%
+      );
+    }
+
+    /* Sun */
+    #garden::before {
+      content: '☀️';
+      position: absolute;
+      top: 32px; right: 60px;
+      font-size: 64px;
+      filter: drop-shadow(0 0 24px #FFD70088);
+      animation: sunFloat 6s ease-in-out infinite;
+    }
+    @keyframes sunFloat {
+      0%,100% { transform: translateY(0); }
+      50%      { transform: translateY(-8px); }
+    }
+
+    /* Clouds */
+    .cloud {
+      position: absolute;
+      background: #fff;
+      border-radius: 999px;
+      opacity: 0.82;
+      animation: cloudDrift linear infinite;
+    }
+    .cloud::before, .cloud::after {
+      content: '';
+      position: absolute;
+      background: #fff;
+      border-radius: 50%;
+    }
+    @keyframes cloudDrift {
+      from { transform: translateX(-300px); }
+      to   { transform: translateX(110vw); }
+    }
+
+    /* Grass row */
+    .grass-row {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 18vh;
+      background: linear-gradient(180deg, #7ec850 0%, #5aaa30 100%);
+      border-radius: 60% 60% 0 0 / 30px 30px 0 0;
+    }
+
+    /* Flowers */
+    .flower {
+      position: absolute;
+      bottom: 12vh;
+      font-size: 2.4rem;
+      animation: sway 3s ease-in-out infinite;
+      transform-origin: bottom center;
+    }
+    @keyframes sway {
+      0%,100% { transform: rotate(-4deg); }
+      50%      { transform: rotate(4deg); }
+    }
+
+    /* Trees */
+    .tree {
+      position: absolute;
+      bottom: 14vh;
+      font-size: 4rem;
+      filter: drop-shadow(2px 4px 6px #0002);
+    }
+
+    /* ══ GAME CANVAS ══ */
+    #canvas {
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    /* ══ BUBBLES ══ */
+    .bubble {
+      position: fixed;
+      border-radius: 50%;
+      cursor: pointer;
+      pointer-events: all;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.1s;
+      will-change: transform;
+    }
+    .bubble:active { transform: scale(0.9); }
+
+    .bubble-inner {
+      width: 100%; height: 100%;
+      border-radius: 50%;
+      position: relative;
+      overflow: hidden;
+    }
+    .bubble-inner::before {
+      content: '';
+      position: absolute;
+      top: 12%; left: 18%;
+      width: 30%; height: 20%;
+      background: #ffffff88;
+      border-radius: 50%;
+      transform: rotate(-30deg);
+    }
+    .bubble-inner::after {
+      content: '';
+      position: absolute;
+      top: 20%; left: 55%;
+      width: 12%; height: 8%;
+      background: #ffffff55;
+      border-radius: 50%;
+    }
+
+    /* Special bubble pulse */
+    .bubble.special {
+      animation: specialPulse 1s ease-in-out infinite;
+    }
+    @keyframes specialPulse {
+      0%,100% { box-shadow: 0 0 0 0 #fff6; }
+      50%      { box-shadow: 0 0 0 12px #fff0; }
+    }
+
+    /* ══ BURST PARTICLES ══ */
+    .particle {
+      position: fixed;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 5;
+      animation: particleFly var(--dur) ease-out forwards;
+    }
+    @keyframes particleFly {
+      0%   { transform: translate(0,0) scale(1); opacity: 1; }
+      100% { transform: translate(var(--tx), var(--ty)) scale(0); opacity: 0; }
+    }
+
+    /* ══ FLYING BIRDS ══ */
+    .flying-bird {
+      position: fixed;
+      pointer-events: none;
+      z-index: 6;
+      font-size: var(--size);
+      animation: birdFly var(--dur) ease-in forwards;
+      filter: drop-shadow(0 4px 8px #0003);
+    }
+    @keyframes birdFly {
+      0%   { transform: translate(0, 0) scale(0.2) rotate(0deg); opacity: 1; }
+      20%  { transform: translate(var(--mx), var(--my)) scale(1.2) rotate(var(--rot)); opacity: 1; }
+      100% { transform: translate(var(--ex), var(--ey)) scale(0.6) rotate(var(--rot)); opacity: 0; }
+    }
+
+    /* ══ SCORE ══ */
+    #score-wrap {
+      position: fixed;
+      top: 20px; left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+      background: #ffffff55;
+      backdrop-filter: blur(8px);
+      border: 2px solid #fff8;
+      border-radius: 999px;
+      padding: 8px 28px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: #2D3A4A;
+    }
+
+    /* ══ SCORE POP ══ */
+    .score-pop {
+      position: fixed;
+      pointer-events: none;
+      z-index: 8;
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: #fff;
+      text-shadow: 0 2px 8px #0004;
+      animation: scorePop 1s ease-out forwards;
+    }
+    @keyframes scorePop {
+      0%   { transform: translateY(0) scale(1); opacity: 1; }
+      100% { transform: translateY(-80px) scale(1.4); opacity: 0; }
+    }
+
+    /* ══ BACK BUTTON ══ */
+    #back-btn {
+      position: fixed;
+      top: 20px; left: 20px;
+      z-index: 10;
+      background: #ffffff55;
+      backdrop-filter: blur(8px);
+      border: 2px solid #fff8;
+      border-radius: 999px;
+      padding: 8px 18px;
+      font-size: 1rem;
+      font-weight: 700;
+      color: #2D3A4A;
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    /* ══ CELEBRATE ══ */
+    #celebrate {
+      position: fixed;
+      inset: 0;
+      z-index: 20;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: #00000033;
+      backdrop-filter: blur(4px);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+    #celebrate.show {
+      opacity: 1;
+      pointer-events: all;
+    }
+    .celebrate-emoji {
+      font-size: 6rem;
+      animation: celebrateBounce 0.5s ease-in-out infinite alternate;
+    }
+    @keyframes celebrateBounce {
+      from { transform: scale(1) rotate(-5deg); }
+      to   { transform: scale(1.15) rotate(5deg); }
+    }
+    .celebrate-text {
+      font-size: 2rem;
+      font-weight: 800;
+      color: #fff;
+      text-shadow: 0 4px 16px #0004;
+      margin-top: 16px;
+    }
+  </style>
+</head>
+<body>
+
+<div id="garden">
+  <!-- clouds injected by JS -->
+  <div class="grass-row"></div>
+  <!-- flowers & trees injected by JS -->
+</div>
+
+<canvas id="canvas"></canvas>
+
+<a href="../../index.html" id="back-btn">← 回家</a>
+
+<div id="score-wrap">
+  <span>🫧</span>
+  <span id="score">0</span>
+</div>
+
+<div id="celebrate">
+  <div class="celebrate-emoji" id="celebrate-emoji">🦜</div>
+  <div class="celebrate-text" id="celebrate-text">好棒！</div>
+</div>
+
+<script>
+// ══ GARDEN DECORATION ══
+(function buildGarden() {
+  const garden = document.getElementById('garden');
+
+  // Clouds
+  const cloudData = [
+    { w:120, h:36, top:'12%', delay:'0s',  dur:'22s' },
+    { w:80,  h:26, top:'8%',  delay:'8s',  dur:'28s' },
+    { w:160, h:44, top:'18%', delay:'14s', dur:'35s' },
+  ];
+  cloudData.forEach(c => {
+    const el = document.createElement('div');
+    el.className = 'cloud';
+    el.style.cssText = `width:${c.w}px;height:${c.h}px;top:${c.top};left:-200px;
+      animation-duration:${c.dur};animation-delay:${c.delay};`;
+    el.before = document.createElement('div');
+    garden.appendChild(el);
+  });
+
+  // Flowers
+  const flowers = ['🌸','🌼','🌺','🌻','🌷','💐','🌸','🌼','🌺'];
+  flowers.forEach((f, i) => {
+    const el = document.createElement('div');
+    el.className = 'flower';
+    el.textContent = f;
+    el.style.left = (5 + i * 11) + '%';
+    el.style.animationDelay = (i * 0.4) + 's';
+    garden.appendChild(el);
+  });
+
+  // Trees
+  const trees = ['🌳','🌲','🌴','🌳','🌲'];
+  trees.forEach((t, i) => {
+    const el = document.createElement('div');
+    el.className = 'tree';
+    el.textContent = t;
+    el.style.left = (8 + i * 22) + '%';
+    garden.appendChild(el);
+  });
+})();
+
+// ══ AUDIO ══
+const AudioCtx = window.AudioContext || window.webkitAudioContext;
+let audioCtx;
+function getAudio() {
+  if (!audioCtx) audioCtx = new AudioCtx();
+  return audioCtx;
+}
+
+function playPop(freq = 520, type = 'sine') {
+  const ctx = getAudio();
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.connect(gain); gain.connect(ctx.destination);
+  osc.type = type;
+  osc.frequency.setValueAtTime(freq, ctx.currentTime);
+  osc.frequency.exponentialRampToValueAtTime(freq * 1.6, ctx.currentTime + 0.08);
+  gain.gain.setValueAtTime(0.4, ctx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.25);
+  osc.start(); osc.stop(ctx.currentTime + 0.25);
+}
+
+function playSpecialPop() {
+  [440, 550, 660, 880].forEach((f, i) => {
+    setTimeout(() => playPop(f, 'triangle'), i * 60);
+  });
+}
+
+// ══ GAME STATE ══
+let score = 0;
+const scoreEl = document.getElementById('score');
+const bubbles = [];
+let specialTimer = 0;
+
+// ══ BUBBLE CONFIG ══
+const SIZES = {
+  small:  { r: 36, color: ['#FF6B9D','#FF8C42','#FFD93D'], special: false },
+  medium: { r: 56, color: ['#4ECDC4','#6BCB77','#A855F7'], special: false },
+  large:  { r: 80, color: ['#87CEEB','#b8a9f8','#f9a8d4'], special: false },
+};
+
+// Bird config per size
+const BIRDS = {
+  small:  { emoji: '🦜', count: 3, size: '2rem',  dur: 1.8 },
+  medium: { emoji: '🐦', count: 2, size: '2.8rem', dur: 2.2 },
+  large:  { emoji: '🦢', count: 1, size: '4rem',   dur: 2.8 },
+};
+
+function randomColor(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+// ══ SPAWN BUBBLE ══
+function spawnBubble(isSpecial = false) {
+  const sizeKeys = ['small','small','medium','medium','large'];
+  const sizeKey = sizeKeys[Math.floor(Math.random() * sizeKeys.length)];
+  const cfg = SIZES[sizeKey];
+  const r = cfg.r;
+
+  const x = r + Math.random() * (window.innerWidth - r * 2);
+  const startY = window.innerHeight + r * 2;
+  const color = isSpecial
+    ? `radial-gradient(circle at 35% 35%, #fff8, ${randomColor(cfg.color)}, ${randomColor(cfg.color)}88)`
+    : `radial-gradient(circle at 35% 35%, #fff6, ${randomColor(cfg.color)}, ${randomColor(cfg.color)}66)`;
+
+  const el = document.createElement('div');
+  el.className = 'bubble' + (isSpecial ? ' special' : '');
+  el.style.cssText = `
+    width:${r*2}px; height:${r*2}px;
+    left:${x - r}px; top:${startY}px;
+    background: ${color};
+    border: 2px solid #ffffff55;
+    box-shadow: inset -4px -4px 12px #0001, 0 4px 16px #0002;
+  `;
+
+  const inner = document.createElement('div');
+  inner.className = 'bubble-inner';
+  el.appendChild(inner);
+
+  if (isSpecial) {
+    const star = document.createElement('span');
+    star.textContent = '✨';
+    star.style.cssText = 'position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:1.4rem;';
+    inner.appendChild(star);
+  }
+
+  document.body.appendChild(el);
+
+  const speed = 0.4 + Math.random() * 0.5;
+  const drift = (Math.random() - 0.5) * 0.6;
+  let posX = x - r;
+  let posY = startY;
+
+  const bubble = { el, posX, posY, r, speed, drift, sizeKey, isSpecial, alive: true };
+  bubbles.push(bubble);
+
+  // Touch/click handler — use larger hit area
+  el.addEventListener('pointerdown', (e) => {
+    e.preventDefault();
+    if (!bubble.alive) return;
+    bubble.alive = false;
+    popBubble(bubble, e.clientX, e.clientY);
+  }, { passive: false });
+
+  return bubble;
+}
+
+// ══ POP BUBBLE ══
+function popBubble(bubble, cx, cy) {
+  bubble.el.remove();
+  const idx = bubbles.indexOf(bubble);
+  if (idx > -1) bubbles.splice(idx, 1);
+
+  // Score
+  const pts = bubble.sizeKey === 'large' ? 3 : bubble.sizeKey === 'medium' ? 2 : 1;
+  score += pts;
+  scoreEl.textContent = score;
+  showScorePop(cx, cy, '+' + pts);
+
+  // Particles
+  spawnParticles(cx, cy, bubble.el.style.background);
+
+  // Sound
+  if (bubble.isSpecial) {
+    playSpecialPop();
+    spawnBirds(cx, cy, bubble.sizeKey);
+    showCelebrate(bubble.sizeKey);
+  } else {
+    const freqs = { small: 600, medium: 480, large: 360 };
+    playPop(freqs[bubble.sizeKey]);
+  }
+}
+
+// ══ PARTICLES ══
+function spawnParticles(cx, cy, color) {
+  const count = 10;
+  for (let i = 0; i < count; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    const angle = (i / count) * Math.PI * 2;
+    const dist = 60 + Math.random() * 60;
+    const tx = Math.cos(angle) * dist;
+    const ty = Math.sin(angle) * dist;
+    const size = 6 + Math.random() * 8;
+    const dur = 0.4 + Math.random() * 0.3;
+    p.style.cssText = `
+      width:${size}px; height:${size}px;
+      left:${cx - size/2}px; top:${cy - size/2}px;
+      background:${color};
+      --tx:${tx}px; --ty:${ty}px; --dur:${dur}s;
+    `;
+    document.body.appendChild(p);
+    setTimeout(() => p.remove(), dur * 1000);
+  }
+}
+
+// ══ FLYING BIRDS ══
+function spawnBirds(cx, cy, sizeKey) {
+  const cfg = BIRDS[sizeKey];
+  for (let i = 0; i < cfg.count; i++) {
+    setTimeout(() => {
+      const bird = document.createElement('div');
+      bird.className = 'flying-bird';
+
+      // Direction: fly toward edge
+      const angle = -Math.PI/2 + (Math.random() - 0.5) * Math.PI * 0.8;
+      const exitDist = Math.max(window.innerWidth, window.innerHeight) * 1.4;
+      const ex = Math.cos(angle) * exitDist;
+      const ey = Math.sin(angle) * exitDist;
+      const mx = Math.cos(angle) * 80;
+      const my = Math.sin(angle) * 80;
+      const rot = angle > 0 ? '15deg' : '-15deg';
+      const dur = cfg.dur + Math.random() * 0.4;
+
+      bird.textContent = cfg.emoji;
+      bird.style.cssText = `
+        left:${cx}px; top:${cy}px;
+        --size:${cfg.size};
+        --dur:${dur}s;
+        --mx:${mx}px; --my:${my}px;
+        --ex:${ex}px; --ey:${ey}px;
+        --rot:${rot};
+      `;
+      document.body.appendChild(bird);
+      setTimeout(() => bird.remove(), dur * 1000 + 100);
+    }, i * 120);
+  }
+}
+
+// ══ SCORE POP ══
+function showScorePop(x, y, text) {
+  const el = document.createElement('div');
+  el.className = 'score-pop';
+  el.textContent = text;
+  el.style.left = x + 'px';
+  el.style.top = y + 'px';
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 1000);
+}
+
+// ══ CELEBRATE ══
+const celebrateEl = document.getElementById('celebrate');
+const celebrateEmoji = document.getElementById('celebrate-emoji');
+const celebrateText = document.getElementById('celebrate-text');
+
+const celebrateData = {
+  small:  { emoji: '🦜🦜🦜', text: '虎皮鹦鹉飞出来啦！' },
+  medium: { emoji: '🐦🐦',   text: '两只八哥出发咯！' },
+  large:  { emoji: '🦢',     text: '大鹈鹕展翅高飞！' },
+};
+
+function showCelebrate(sizeKey) {
+  const d = celebrateData[sizeKey];
+  celebrateEmoji.textContent = d.emoji;
+  celebrateText.textContent = d.text;
+  celebrateEl.classList.add('show');
+  setTimeout(() => celebrateEl.classList.remove('show'), 2200);
+}
+
+celebrateEl.addEventListener('pointerdown', () => {
+  celebrateEl.classList.remove('show');
+});
+
+// ══ GAME LOOP ══
+let lastTime = 0;
+let spawnTimer = 0;
+const SPAWN_INTERVAL = 1200;
+
+function loop(ts) {
+  const dt = ts - lastTime;
+  lastTime = ts;
+
+  // Move bubbles
+  for (let i = bubbles.length - 1; i >= 0; i--) {
+    const b = bubbles[i];
+    b.posY -= b.speed * (dt / 16);
+    b.posX += b.drift * (dt / 16);
+    b.el.style.top  = b.posY + 'px';
+    b.el.style.left = b.posX + 'px';
+
+    // Remove if off screen
+    if (b.posY < -b.r * 3) {
+      b.el.remove();
+      bubbles.splice(i, 1);
+    }
+  }
+
+  // Spawn
+  spawnTimer += dt;
+  if (spawnTimer > SPAWN_INTERVAL) {
+    spawnTimer = 0;
+    const isSpecial = Math.random() < 0.18;
+    spawnBubble(isSpecial);
+  }
+
+  requestAnimationFrame(loop);
+}
+
+// Initial bubbles
+for (let i = 0; i < 5; i++) {
+  const b = spawnBubble();
+  b.posY = window.innerHeight * (0.2 + Math.random() * 0.6);
+  b.el.style.top = b.posY + 'px';
+}
+
+requestAnimationFrame(loop);
+</script>
+
+</body>
+</html>
