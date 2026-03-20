@@ -11,86 +11,130 @@
       font-family: 'PingFang SC', sans-serif;
       overflow: hidden;
       width: 100vw; height: 100vh;
-      background: #87CEEB;
+      background: #0a1f1a;
       user-select: none;
       -webkit-user-select: none;
     }
 
-    /* ══ GARDEN BACKGROUND ══ */
+    /* ══ AVATAR FOREST BACKGROUND ══ */
     #garden {
       position: fixed;
       inset: 0;
       z-index: 0;
+      /* Deep Pandora sky: dark teal-blue to misty green */
       background: linear-gradient(180deg,
-        #b8e4f9 0%,
-        #d4f1ff 40%,
-        #c8f0a0 70%,
-        #7ec850 85%,
-        #5aaa30 100%
+        #071a2e 0%,
+        #0d3348 18%,
+        #0a4a3a 38%,
+        #0e5c3a 55%,
+        #1a6b35 72%,
+        #1f7a30 85%,
+        #256b28 100%
       );
+      overflow: hidden;
     }
 
-    /* Sun */
-    #garden::before {
-      content: '☀️';
-      position: absolute;
-      top: 32px; right: 60px;
-      font-size: 64px;
-      filter: drop-shadow(0 0 24px #FFD70088);
-      animation: sunFloat 6s ease-in-out infinite;
-    }
-    @keyframes sunFloat {
-      0%,100% { transform: translateY(0); }
-      50%      { transform: translateY(-8px); }
-    }
-
-    /* Clouds */
-    .cloud {
-      position: absolute;
-      background: #fff;
-      border-radius: 999px;
-      opacity: 0.82;
-      animation: cloudDrift linear infinite;
-    }
-    .cloud::before, .cloud::after {
+    /* Magical light rays from above */
+    #garden::after {
       content: '';
       position: absolute;
-      background: #fff;
-      border-radius: 50%;
+      top: 0; left: 0; right: 0;
+      height: 60%;
+      background:
+        conic-gradient(from 260deg at 30% -10%, transparent 15deg, #4ade8011 18deg, transparent 22deg),
+        conic-gradient(from 270deg at 55% -5%,  transparent 15deg, #a3f0c011 18deg, transparent 22deg),
+        conic-gradient(from 255deg at 75% -8%,  transparent 15deg, #6ee7b711 18deg, transparent 22deg);
+      pointer-events: none;
+      animation: rayShift 12s ease-in-out infinite alternate;
     }
-    @keyframes cloudDrift {
-      from { transform: translateX(-300px); }
-      to   { transform: translateX(110vw); }
+    @keyframes rayShift {
+      0%   { opacity: 0.6; transform: scaleX(1); }
+      100% { opacity: 1;   transform: scaleX(1.04); }
     }
 
-    /* Grass row */
-    .grass-row {
+    /* ── Mist layers ── */
+    .mist {
+      position: absolute;
+      left: -20%; right: -20%;
+      height: 120px;
+      border-radius: 50%;
+      pointer-events: none;
+      animation: mistDrift ease-in-out infinite alternate;
+    }
+    @keyframes mistDrift {
+      0%   { transform: translateX(-3%) scaleY(1); opacity: var(--op); }
+      100% { transform: translateX(3%)  scaleY(1.1); opacity: calc(var(--op) * 0.7); }
+    }
+
+    /* ── Background giant trees (silhouette) ── */
+    .bg-tree {
+      position: absolute;
+      bottom: 10vh;
+      pointer-events: none;
+    }
+    .bg-tree svg { display: block; }
+
+    /* ── Foreground lush ground ── */
+    .ground-layer {
       position: absolute;
       bottom: 0; left: 0; right: 0;
-      height: 18vh;
-      background: linear-gradient(180deg, #7ec850 0%, #5aaa30 100%);
-      border-radius: 60% 60% 0 0 / 30px 30px 0 0;
+      pointer-events: none;
     }
 
-    /* Flowers */
-    .flower {
+    /* ── Bioluminescent floating seeds (Avatar's Woodsprites) ── */
+    .seed {
       position: absolute;
-      bottom: 12vh;
-      font-size: 2.4rem;
-      animation: sway 3s ease-in-out infinite;
-      transform-origin: bottom center;
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: #fff;
+      pointer-events: none;
+      animation: seedFloat var(--dur) ease-in-out infinite;
+      box-shadow: 0 0 6px 3px #a0ffe888, 0 0 12px 6px #4dffc855;
     }
-    @keyframes sway {
-      0%,100% { transform: rotate(-4deg); }
-      50%      { transform: rotate(4deg); }
+    @keyframes seedFloat {
+      0%   { transform: translate(0, 0) scale(1); opacity: 0.9; }
+      30%  { transform: translate(var(--dx1), calc(var(--dy1) * -1)) scale(1.2); opacity: 1; }
+      60%  { transform: translate(var(--dx2), calc(var(--dy2) * -2)) scale(0.9); opacity: 0.8; }
+      100% { transform: translate(var(--dx3), calc(var(--dy3) * -3.5)) scale(0.3); opacity: 0; }
     }
 
-    /* Trees */
-    .tree {
+    /* ── Background ambient birds (silhouettes) ── */
+    .ambient-bird {
+      position: absolute;
+      pointer-events: none;
+      font-size: var(--sz);
+      opacity: 0.55;
+      filter: blur(0.5px) drop-shadow(0 2px 4px #0006);
+      animation: ambientFly var(--dur) linear infinite;
+    }
+    @keyframes ambientFly {
+      from { transform: translateX(-120px); opacity: 0; }
+      5%   { opacity: 0.5; }
+      95%  { opacity: 0.5; }
+      to   { transform: translateX(110vw); opacity: 0; }
+    }
+
+    /* ── Glowing mushrooms / flowers ── */
+    .glow-plant {
       position: absolute;
       bottom: 14vh;
-      font-size: 4rem;
-      filter: drop-shadow(2px 4px 6px #0002);
+      font-size: var(--sz);
+      filter: drop-shadow(0 0 8px var(--glow)) drop-shadow(0 0 16px var(--glow));
+      animation: plantSway var(--sway) ease-in-out infinite;
+      transform-origin: bottom center;
+      pointer-events: none;
+    }
+    @keyframes plantSway {
+      0%,100% { transform: rotate(calc(var(--angle) * -1)); }
+      50%      { transform: rotate(var(--angle)); }
+    }
+
+    /* ── Giant tree trunks foreground ── */
+    .fg-tree {
+      position: absolute;
+      bottom: 0;
+      pointer-events: none;
+      opacity: 0.92;
     }
 
     /* ══ GAME CANVAS ══ */
@@ -267,11 +311,7 @@
 </head>
 <body>
 
-<div id="garden">
-  <!-- clouds injected by JS -->
-  <div class="grass-row"></div>
-  <!-- flowers & trees injected by JS -->
-</div>
+<div id="garden"></div>
 
 <canvas id="canvas"></canvas>
 
@@ -288,43 +328,140 @@
 </div>
 
 <script>
-// ══ GARDEN DECORATION ══
+// ══ AVATAR FOREST BUILDER ══
 (function buildGarden() {
   const garden = document.getElementById('garden');
 
-  // Clouds
-  const cloudData = [
-    { w:120, h:36, top:'12%', delay:'0s',  dur:'22s' },
-    { w:80,  h:26, top:'8%',  delay:'8s',  dur:'28s' },
-    { w:160, h:44, top:'18%', delay:'14s', dur:'35s' },
+  // ── Ground layers (SVG) ──
+  const groundSVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 220" preserveAspectRatio="none"
+    style="position:absolute;bottom:0;left:0;width:100%;height:22vh;display:block;">
+    <path d="M0,160 C200,100 400,180 600,130 C800,80 1000,160 1200,120 C1320,100 1400,140 1440,130 L1440,220 L0,220 Z"
+      fill="#0f4a1e" opacity="0.95"/>
+    <path d="M0,185 C180,155 360,195 540,170 C720,145 900,185 1080,165 C1260,145 1380,175 1440,165 L1440,220 L0,220 Z"
+      fill="#0d3d18" opacity="0.9"/>
+    <path d="M0,200 C240,188 480,210 720,200 C960,190 1200,208 1440,200 L1440,220 L0,220 Z"
+      fill="#0a3014"/>
+  </svg>`;
+  garden.insertAdjacentHTML('beforeend', groundSVG);
+
+  // ── Giant background tree silhouettes (SVG) ──
+  const treeSVGs = [
+    { x:'5%',  scale:1.1, opacity:0.45, delay:'0s' },
+    { x:'18%', scale:0.85,opacity:0.35, delay:'4s' },
+    { x:'72%', scale:1.0, opacity:0.4,  delay:'2s' },
+    { x:'85%', scale:1.2, opacity:0.5,  delay:'6s' },
   ];
-  cloudData.forEach(c => {
+  treeSVGs.forEach(t => {
+    const w = 180 * t.scale;
+    const h = 380 * t.scale;
     const el = document.createElement('div');
-    el.className = 'cloud';
-    el.style.cssText = `width:${c.w}px;height:${c.h}px;top:${c.top};left:-200px;
-      animation-duration:${c.dur};animation-delay:${c.delay};`;
-    el.before = document.createElement('div');
+    el.style.cssText = `position:absolute;bottom:10vh;left:${t.x};opacity:${t.opacity};
+      transform:scaleX(${t.scale});transform-origin:bottom center;pointer-events:none;`;
+    el.innerHTML = `<svg width="${w}" height="${h}" viewBox="0 0 180 380" xmlns="http://www.w3.org/2000/svg">
+      <!-- trunk -->
+      <rect x="82" y="240" width="16" height="140" rx="8" fill="#1a4a22"/>
+      <rect x="86" y="200" width="8" height="80" rx="4" fill="#122e16"/>
+      <!-- canopy layers -->
+      <ellipse cx="90" cy="200" rx="78" ry="52" fill="#0e4a1f"/>
+      <ellipse cx="90" cy="160" rx="62" ry="46" fill="#125a26"/>
+      <ellipse cx="90" cy="124" rx="48" ry="38" fill="#166830"/>
+      <ellipse cx="90" cy="94"  rx="36" ry="30" fill="#1a7a38"/>
+      <ellipse cx="90" cy="70"  rx="24" ry="22" fill="#20943f"/>
+      <!-- bioluminescent dots -->
+      <circle cx="60" cy="155" r="3" fill="#7fffb0" opacity="0.7"/>
+      <circle cx="115" cy="140" r="2" fill="#a0ffd0" opacity="0.6"/>
+      <circle cx="80" cy="105" r="2.5" fill="#7fffb0" opacity="0.8"/>
+      <circle cx="100" cy="80" r="2" fill="#b0ffe0" opacity="0.7"/>
+    </svg>`;
     garden.appendChild(el);
   });
 
-  // Flowers
-  const flowers = ['🌸','🌼','🌺','🌻','🌷','💐','🌸','🌼','🌺'];
-  flowers.forEach((f, i) => {
+  // ── Foreground fern/plant silhouettes ──
+  const plants = [
+    { left:'2%',  sz:'3.2rem', glow:'#4ade80', sway:'3.2s', angle:'5deg' },
+    { left:'12%', sz:'2.8rem', glow:'#86efac', sway:'2.8s', angle:'4deg' },
+    { left:'24%', sz:'3.5rem', glow:'#34d399', sway:'4s',   angle:'6deg' },
+    { left:'38%', sz:'2.4rem', glow:'#6ee7b7', sway:'3s',   angle:'3deg' },
+    { left:'52%', sz:'3rem',   glow:'#4ade80', sway:'3.6s', angle:'5deg' },
+    { left:'64%', sz:'2.6rem', glow:'#a7f3d0', sway:'2.6s', angle:'4deg' },
+    { left:'76%', sz:'3.2rem', glow:'#34d399', sway:'3.8s', angle:'6deg' },
+    { left:'88%', sz:'2.8rem', glow:'#6ee7b7', sway:'3.2s', angle:'4deg' },
+  ];
+  const plantEmojis = ['🌿','🌱','☘️','🍃','🌾','🌿','🍀','🌱'];
+  plants.forEach((p, i) => {
     const el = document.createElement('div');
-    el.className = 'flower';
-    el.textContent = f;
-    el.style.left = (5 + i * 11) + '%';
-    el.style.animationDelay = (i * 0.4) + 's';
+    el.className = 'glow-plant';
+    el.textContent = plantEmojis[i];
+    el.style.cssText = `left:${p.left};--sz:${p.sz};--glow:${p.glow};
+      --sway:${p.sway};--angle:${p.angle};
+      animation-delay:${i * 0.3}s;`;
     garden.appendChild(el);
   });
 
-  // Trees
-  const trees = ['🌳','🌲','🌴','🌳','🌲'];
-  trees.forEach((t, i) => {
+  // ── Glowing bioluminescent mushrooms ──
+  const shrooms = [
+    { left:'7%',  emoji:'🍄', glow:'#f0abfc', sz:'2rem' },
+    { left:'33%', emoji:'🍄', glow:'#818cf8', sz:'1.6rem' },
+    { left:'58%', emoji:'🍄', glow:'#c084fc', sz:'2rem' },
+    { left:'82%', emoji:'🍄', glow:'#f0abfc', sz:'1.8rem' },
+  ];
+  shrooms.forEach(s => {
     const el = document.createElement('div');
-    el.className = 'tree';
-    el.textContent = t;
-    el.style.left = (8 + i * 22) + '%';
+    el.className = 'glow-plant';
+    el.textContent = s.emoji;
+    el.style.cssText = `left:${s.left};--sz:${s.sz};--glow:${s.glow};
+      --sway:4s;--angle:3deg;bottom:13.5vh;`;
+    garden.appendChild(el);
+  });
+
+  // ── Mist layers ──
+  const mists = [
+    { top:'55%', h:'90px',  color:'#4ade8008', dur:'14s', delay:'0s' },
+    { top:'65%', h:'120px', color:'#86efac0a', dur:'18s', delay:'3s' },
+    { top:'72%', h:'80px',  color:'#34d39908', dur:'11s', delay:'7s' },
+  ];
+  mists.forEach(m => {
+    const el = document.createElement('div');
+    el.className = 'mist';
+    el.style.cssText = `top:${m.top};height:${m.h};
+      background:radial-gradient(ellipse, ${m.color} 0%, transparent 70%);
+      --op:0.8;
+      animation-duration:${m.dur};animation-delay:${m.delay};`;
+    garden.appendChild(el);
+  });
+
+  // ── Floating Woodsprite seeds ──
+  for (let i = 0; i < 22; i++) {
+    const el = document.createElement('div');
+    el.className = 'seed';
+    const x = Math.random() * 100;
+    const startY = 60 + Math.random() * 35;
+    const dur = 6 + Math.random() * 8;
+    const dx = (Math.random() - 0.5) * 60;
+    el.style.cssText = `
+      left:${x}%; top:${startY}%;
+      --dur:${dur}s;
+      --dx1:${dx * 0.3}px; --dy1:${20 + Math.random()*20}px;
+      --dx2:${dx * 0.6}px; --dy2:${15 + Math.random()*15}px;
+      --dx3:${dx}px;       --dy3:${10 + Math.random()*10}px;
+      animation-delay:${Math.random() * dur}s;
+      width:${3 + Math.random()*4}px; height:${3 + Math.random()*4}px;
+    `;
+    garden.appendChild(el);
+  }
+
+  // ── Ambient background birds ──
+  const ambientBirds = ['🦜','🐦','🦅','🦜','🐦'];
+  ambientBirds.forEach((b, i) => {
+    const el = document.createElement('div');
+    el.className = 'ambient-bird';
+    const top = 8 + Math.random() * 35;
+    const dur = 20 + Math.random() * 20;
+    el.textContent = b;
+    el.style.cssText = `top:${top}%;left:-80px;
+      --sz:${1.4 + Math.random() * 1.2}rem;
+      --dur:${dur}s;
+      animation-delay:${i * 5 + Math.random() * 4}s;`;
     garden.appendChild(el);
   });
 })();
